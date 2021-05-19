@@ -1,0 +1,86 @@
+select 
+
+(
+if (datediff(dt_afastamento, dt_retorno) = 0
+,
+time_to_sec(TIMEDIFF(dt_retorno, dt_afastamento))/3600
+,        
+(if (if ((DAYOFWEEK(dt_afastamento) + 6) > 7, 
+	(DAYOFWEEK(dt_afastamento) + 6)%7 + datediff(dt_retorno, dt_afastamento)%7,
+    (DAYOFWEEK(dt_afastamento) + 6 + datediff(dt_retorno, dt_afastamento)%7)) < 6, /*se diaConvertidoMaisResto menor que 6 */
+    
+		((if ((DAYOFWEEK(dt_afastamento) + 6) > 7, 
+		(DAYOFWEEK(dt_afastamento) + 6)%7 + datediff(dt_retorno, dt_afastamento)%7,
+		(DAYOFWEEK(dt_afastamento) + 6 + datediff(dt_retorno, dt_afastamento)%7))*8 /*(dayReal + resto)*8 */
+		-
+		if ((DAYOFWEEK(dt_afastamento) + 6) > 7, 
+		(DAYOFWEEK(dt_afastamento) + 6)%7,
+		(DAYOFWEEK(dt_afastamento) + 6))*8)     /*dayStart*8 */
+        + floor(datediff(dt_retorno, dt_afastamento)/7)*44) + time_to_sec(timediff(TIME_FORMAT(dt_retorno, '%T'), '08:00:00' ))/3600
+        - time_to_sec(timediff(TIME_FORMAT(dt_afastamento, '%T'), '08:00:00' ))/3600,
+        
+        if(
+			if ((DAYOFWEEK(dt_afastamento) + 6) > 7, 
+			(DAYOFWEEK(dt_afastamento) + 6)%7 + datediff(dt_retorno, dt_afastamento)%7,
+			(DAYOFWEEK(dt_afastamento) + 6 + datediff(dt_retorno, dt_afastamento)%7)) = 6, /*Se o atestado finalizar no sab */
+            (
+				((if ((DAYOFWEEK(dt_afastamento) + 6) > 7, 
+				(DAYOFWEEK(dt_afastamento) + 6)%7 + datediff(dt_retorno, dt_afastamento)%7,
+				(DAYOFWEEK(dt_afastamento) + 6 + datediff(dt_retorno, dt_afastamento)%7))*8 + 4  /*No sab conta-se apenas 4 hrs*/
+				-
+				if ((DAYOFWEEK(dt_afastamento) + 6) > 7, 
+				(DAYOFWEEK(dt_afastamento) + 6)%7,  /*dayStart*8 */
+				(DAYOFWEEK(dt_afastamento) + 6))*8) + floor(datediff(dt_retorno, dt_afastamento)/7)*44) + time_to_sec(timediff(TIME_FORMAT(dt_retorno, '%T'), '08:00:00' ))/3600
+                - time_to_sec(timediff(TIME_FORMAT(dt_afastamento, '%T'), '08:00:00' ))/3600
+            ),
+            
+            (
+            if(if ((DAYOFWEEK(dt_afastamento) + 6) > 7, 
+			(DAYOFWEEK(dt_afastamento) + 6)%7,
+			(DAYOFWEEK(dt_afastamento) + 6)) = 7, /*Se começa no domingo*/
+                
+					((if ((DAYOFWEEK(dt_afastamento) + 6) > 7, 
+					(DAYOFWEEK(dt_afastamento) + 6)%7 + datediff(dt_retorno, dt_afastamento)%7,
+					(DAYOFWEEK(dt_afastamento) + 6 + datediff(dt_retorno, dt_afastamento)%7))*8  /*No sab conta-se apenas 4 hrs*/
+					- 8 -
+					if ((DAYOFWEEK(dt_afastamento) + 6) > 7, 
+					(DAYOFWEEK(dt_afastamento) + 6)%7,  /*dayStart*8 */
+					(DAYOFWEEK(dt_afastamento) + 6))*8) + floor(datediff(dt_retorno, dt_afastamento)/7)*44) + time_to_sec(timediff(TIME_FORMAT(dt_retorno, '%T'), '08:00:00' ))/3600
+                    - time_to_sec(timediff(TIME_FORMAT(dt_afastamento, '%T'), '08:00:00' ))/3600,
+                    
+                    
+                    (
+                    if(if ((DAYOFWEEK(dt_afastamento) + 6) > 7, 
+					(DAYOFWEEK(dt_afastamento) + 6)%7,
+					(DAYOFWEEK(dt_afastamento) + 6)) = 6, /*Se começa no sab*/
+                    
+                    ((if ((DAYOFWEEK(dt_afastamento) + 6) > 7, 
+					(DAYOFWEEK(dt_afastamento) + 6)%7 + datediff(dt_retorno, dt_afastamento)%7,
+					(DAYOFWEEK(dt_afastamento) + 6 + datediff(dt_retorno, dt_afastamento)%7))*8  /*No sab conta-se apenas 4 hrs*/
+					- 12 -
+					if ((DAYOFWEEK(dt_afastamento) + 6) > 7, 
+					(DAYOFWEEK(dt_afastamento) + 6)%7,  /*dayStart*8 */
+					(DAYOFWEEK(dt_afastamento) + 6))*8) + floor(datediff(dt_retorno, dt_afastamento)/7)*44) + time_to_sec(timediff(TIME_FORMAT(dt_retorno, '%T'), '08:00:00' ))/3600
+                    - time_to_sec(timediff(TIME_FORMAT(dt_afastamento, '%T'), '08:00:00' ))/3600
+                    ,
+                    
+                    ((if ((DAYOFWEEK(dt_afastamento) + 6) > 7, 
+					(DAYOFWEEK(dt_afastamento) + 6)%7 + datediff(dt_retorno, dt_afastamento)%7,
+					(DAYOFWEEK(dt_afastamento) + 6 + datediff(dt_retorno, dt_afastamento)%7))*8  /*No sab conta-se apenas 4 hrs*/
+					- 12 -
+					if ((DAYOFWEEK(dt_afastamento) + 6) > 7, 
+					(DAYOFWEEK(dt_afastamento) + 6)%7,  /*dayStart*8 */
+					(DAYOFWEEK(dt_afastamento) + 6))*8) + floor(datediff(dt_retorno, dt_afastamento)/7)*44) + time_to_sec(timediff(TIME_FORMAT(dt_retorno, '%T'), '08:00:00' ))/3600
+                    - time_to_sec(timediff(TIME_FORMAT(dt_afastamento, '%T'), '08:00:00' ))/3600
+                    )
+                    )
+                    )
+                    )
+            )
+            )
+            )
+        )
+    ) as horasTotais
+
+from tb_saude_atestado
+
